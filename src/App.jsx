@@ -9,6 +9,38 @@ import { runRM } from './utils/rmScheduler';
 import { runEDF } from './utils/edfScheduler';
 import './App.css';
 
+const TASK_COLORS = ['#4f8ef7','#9b59f7','#22d3a5','#ff7c45','#ffd166','#00d4ff','#ff4d6d','#a8ff78'];
+
+const PRESETS = {
+  classic: {
+    label: 'Classic RM',
+    algo: 'RM',
+    tasks: [
+      { name: 'T1', executionTime: 1, period: 4 },
+      { name: 'T2', executionTime: 2, period: 6 },
+      { name: 'T3', executionTime: 2, period: 12 },
+    ],
+  },
+  edf: {
+    label: 'EDF Demo',
+    algo: 'EDF',
+    tasks: [
+      { name: 'T1', executionTime: 2, period: 5 },
+      { name: 'T2', executionTime: 3, period: 7 },
+      { name: 'T3', executionTime: 1, period: 10 },
+    ],
+  },
+  stress: {
+    label: 'Overloaded',
+    algo: 'RM',
+    tasks: [
+      { name: 'T1', executionTime: 3, period: 4 },
+      { name: 'T2', executionTime: 3, period: 5 },
+      { name: 'T3', executionTime: 2, period: 8 },
+    ],
+  },
+};
+
 export default function App() {
   const [tasks, setTasks] = useState([]);
   const [algorithm, setAlgorithm] = useState('RM');
@@ -27,6 +59,21 @@ export default function App() {
     setResult(null);
   };
 
+  const handleLoadPreset = (presetKey) => {
+    const preset = PRESETS[presetKey];
+    const loadedTasks = preset.tasks.map((t, i) => ({
+      id: Date.now() + i,
+      name: t.name,
+      executionTime: t.executionTime,
+      period: t.period,
+      deadline: t.period,
+      color: TASK_COLORS[i % TASK_COLORS.length],
+    }));
+    setTasks(loadedTasks);
+    setAlgorithm(preset.algo);
+    setResult(null);
+  };
+
   const handleRunSimulation = useCallback(() => {
     if (tasks.length === 0) return;
     setIsRunning(true);
@@ -38,13 +85,17 @@ export default function App() {
         console.error('Simulation error:', e);
       }
       setIsRunning(false);
-    }, 80); // slight delay for loading feedback
+    }, 80);
   }, [tasks, algorithm]);
 
   const handleReset = () => { setResult(null); };
 
   return (
     <>
+      {/* Ambient background glow orbs */}
+      <div className="bg-orb" style={{ width: 500, height: 500, background: '#4f8ef7', top: -100, left: -100 }} />
+      <div className="bg-orb" style={{ width: 400, height: 400, background: '#9b59f7', top: 200, right: -150 }} />
+      <div className="bg-orb" style={{ width: 300, height: 300, background: '#22d3a5', bottom: 100, left: '40%' }} />
       <Header />
       <div className="app-wrapper">
         {/* Hero */}
@@ -107,6 +158,18 @@ export default function App() {
                   <p style={{ fontSize: '0.78rem', marginTop: '0.1rem' }}>Define periodic real-time tasks</p>
                 </div>
               </div>
+              {/* Quick Presets */}
+              <div style={{ marginBottom: '1rem' }}>
+                <div className="card-title">Quick Presets</div>
+                <div className="presets-row">
+                  {Object.entries(PRESETS).map(([key, p]) => (
+                    <button key={key} id={`preset-${key}`} className="preset-btn" onClick={() => handleLoadPreset(key)}>
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="sep" />
               <TaskInputForm
                 tasks={tasks}
                 onAddTask={handleAddTask}
@@ -174,6 +237,21 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="footer">
+          <p>
+            <strong style={{ color: 'var(--text-secondary)' }}>RT Scheduler</strong> — Real-Time Scheduling Algorithm Simulator
+          </p>
+          <p>
+            CSE316 Operating Systems Project &nbsp;·&nbsp;
+            <a href="https://github.com/AdityaUday04/CSE316" target="_blank" rel="noreferrer">GitHub Repository</a>
+            &nbsp;·&nbsp; RM &amp; EDF Algorithms
+          </p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.7rem' }}>
+            Based on Liu &amp; Layland (1973) — "Scheduling Algorithms for Multiprogramming in a Hard-Real-Time Environment"
+          </p>
+        </footer>
       </div>
     </>
   );
