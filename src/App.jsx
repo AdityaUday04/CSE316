@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './components/Header';
+import TaskInputForm from './components/TaskInputForm';
+import TaskTable from './components/TaskTable';
 import './App.css';
 
 export default function App() {
+  const [tasks, setTasks] = useState([]);
+  const [algorithm, setAlgorithm] = useState('RM');
+
+  const handleAddTask = (task) => setTasks((prev) => [...prev, task]);
+  const handleRemoveTask = (id) => setTasks((prev) => prev.filter((t) => t.id !== id));
+  const handleClearTasks = () => setTasks([]);
+
   return (
     <>
       <Header />
@@ -28,20 +37,80 @@ export default function App() {
           </div>
         </section>
 
-        {/* Main layout placeholder — modules will fill this */}
+        {/* Simulator Layout */}
         <div className="two-column" id="simulator">
-          <div className="card animate-in">
-            <div className="card-title">Input Panel</div>
-            <div className="empty-state">
-              <div className="empty-state-icon">⚙️</div>
-              <p>Task input form will appear here</p>
+          {/* Left Panel */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Algorithm Selector */}
+            <div className="card animate-in">
+              <div className="section-header">
+                <div className="section-icon">🧮</div>
+                <div>
+                  <h3>Algorithm</h3>
+                  <p style={{ fontSize: '0.78rem', marginTop: '0.1rem' }}>
+                    Select scheduling policy
+                  </p>
+                </div>
+              </div>
+              <div className="algo-tabs">
+                <button
+                  id="algo-rm"
+                  className={`algo-tab ${algorithm === 'RM' ? 'active' : ''}`}
+                  onClick={() => setAlgorithm('RM')}
+                >
+                  ⚡ Rate Monotonic
+                </button>
+                <button
+                  id="algo-edf"
+                  className={`algo-tab ${algorithm === 'EDF' ? 'active' : ''}`}
+                  onClick={() => setAlgorithm('EDF')}
+                >
+                  🎯 EDF
+                </button>
+              </div>
+              <div className="alert alert-info" style={{ marginTop: '1rem' }}>
+                <span>ℹ</span>
+                {algorithm === 'RM'
+                  ? 'Rate Monotonic: shorter period = higher priority (static)'
+                  : 'EDF: closest deadline = highest priority (dynamic)'}
+              </div>
+            </div>
+
+            {/* Task Input */}
+            <div className="card animate-in">
+              <div className="section-header">
+                <div className="section-icon">➕</div>
+                <div>
+                  <h3>Add Task</h3>
+                  <p style={{ fontSize: '0.78rem', marginTop: '0.1rem' }}>
+                    Define periodic real-time tasks
+                  </p>
+                </div>
+              </div>
+              <TaskInputForm
+                tasks={tasks}
+                onAddTask={handleAddTask}
+                onRemoveTask={handleRemoveTask}
+                onClearTasks={handleClearTasks}
+              />
+              <TaskTable tasks={tasks} onRemoveTask={handleRemoveTask} />
             </div>
           </div>
+
+          {/* Right Panel */}
           <div className="card animate-in">
-            <div className="card-title">Gantt Chart</div>
+            <div className="section-header">
+              <div className="section-icon">📊</div>
+              <div>
+                <h3>Schedule Visualization</h3>
+                <p style={{ fontSize: '0.78rem', marginTop: '0.1rem' }}>
+                  Gantt chart — one hyperperiod
+                </p>
+              </div>
+            </div>
             <div className="empty-state">
               <div className="empty-state-icon">📊</div>
-              <p>Schedule visualization will appear here</p>
+              <p>Add tasks and click <strong>Run Simulation</strong> to visualize</p>
             </div>
           </div>
         </div>
