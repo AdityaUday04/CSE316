@@ -4,6 +4,7 @@ import TaskInputForm from './components/TaskInputForm';
 import TaskTable from './components/TaskTable';
 import GanttChart from './components/GanttChart';
 import MetricsPanel from './components/MetricsPanel';
+import ValidationPanel from './components/ValidationPanel';
 import { runRM } from './utils/rmScheduler';
 import { runEDF } from './utils/edfScheduler';
 import './App.css';
@@ -114,6 +115,11 @@ export default function App() {
               />
               <TaskTable tasks={tasks} onRemoveTask={handleRemoveTask} />
             </div>
+
+            {/* Validation Panel */}
+            {tasks.length > 0 && (
+              <ValidationPanel tasks={tasks} algorithm={algorithm} />
+            )}
 
             {/* Run Button */}
             {tasks.length > 0 && (
